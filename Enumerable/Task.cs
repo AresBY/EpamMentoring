@@ -106,8 +106,10 @@ namespace EnumerableTask
             //{
             //    throw new ArgumentNullException("prefix is null");
             //}
+            // var out1 = data.Where(t => t != null && t.StartsWith(prefix.ToLower()));
 
-            return data.Where(t => t != null && t.StartsWith(prefix.ToLower()));
+            var out2 = prefix != null ? data.Where(t => t != null && t.StartsWith(prefix.ToLower())) : throw new ArgumentNullException("prefix is null");
+            return out2;
         }
 
         /// <summary> Returns every second item from source sequence</summary>
@@ -161,7 +163,20 @@ namespace EnumerableTask
         public IEnumerable<char> GetUsedChars(IEnumerable<string> data)
         {
             // TODO : Implement GetUsedChars
-            return data.DefaultIfEmpty(string.Empty).Aggregate<IEnumerable<char>>((result, t) => result.Union(t != null ? t : string.Empty));
+            Stopwatch watcher = new Stopwatch();
+
+            watcher.Start();
+            var outPut = data.DefaultIfEmpty(string.Empty).Aggregate<IEnumerable<char>>((result, t) => result.Union(t != null ? t : string.Empty));
+            watcher.Stop();
+
+            var time = watcher.Elapsed;
+
+            watcher.Start();
+            var outPut2 = data.DefaultIfEmpty(string.Empty).Aggregate((result, t) => result + t).Distinct();
+            watcher.Stop();
+
+            Console.WriteLine($"Union time is {time}, Concat/Distinct time is {watcher.Elapsed}");
+            return outPut2;
         }
 
 
@@ -267,7 +282,12 @@ namespace EnumerableTask
         public IEnumerable<Tuple<string, int>> GetCountOfStrings(IEnumerable<string> data)
         {
             // TODO : Implement GetCountOfStrings
-            return data.Select(t => Tuple.Create(t, data.Where(i => i == t).Count())).Distinct();
+            // TODO : Implement GetUsedChars
+
+
+            //var out1 = data.Select(t => Tuple.Create(t, data.Where(i => i == t).Count())).Distinct();
+            var out2 = data.Select(t => Tuple.Create(t, data.Count(i => i == t))).Distinct();
+            return out2;
         }
 
         /// <summary> Counts the number of strings with max length in sequence </summary>
@@ -284,7 +304,11 @@ namespace EnumerableTask
         /// </example>
         public int GetCountOfStringsWithMaxLength(IEnumerable<string> data)
         {
-            return data.Where(i => (i != null ? i : string.Empty).Length == data.Max(t => (t != null ? t : string.Empty).Length)).Count();
+            // var out1 = data.Where(i => (i != null ? i : string.Empty).Length == data.Max(t => (t != null ? t : string.Empty).Length)).Count();
+
+            int maxLength = data.DefaultIfEmpty(string.Empty).Max(t => !string.IsNullOrEmpty(t) ? t.Length : 0);
+            int out2 = data.Count(t => (!string.IsNullOrEmpty(t) ? t.Length : 0) == maxLength);
+            return out2;
         }
 
 
@@ -305,8 +329,9 @@ namespace EnumerableTask
         public int GetDigitCharsCount(string data)
         {
             // TODO : Implement GetDigitCharsCount
-
-            return (data != null ? data : string.Empty).Where(t => char.IsDigit(t)).Count();
+            //var out1 = (data != null ? data : string.Empty).Where(t => char.IsDigit(t)).Count();
+            var out2 = (data != null ? data : throw new ArgumentNullException("data is null")).Where(t => char.IsDigit(t)).Count();
+            return out2;
         }
 
 
@@ -510,7 +535,9 @@ namespace EnumerableTask
         public int GetTotalStringsLength(IEnumerable<string> data)
         {
             // TODO : Implement GetTotalStringsLength
-            return data.OfType<string>().Aggregate((result, t) => result + t).Length;
+            // var out1 = data.OfType<string>().Aggregate((result, t) => result + t).Length;
+            var out2 = data.OfType<string>().Sum(t => t.Length);
+            return out2;
         }
 
         /// <summary> Determines whether sequence has null elements</summary>
@@ -585,7 +612,9 @@ namespace EnumerableTask
         public bool AreNumericListsEqual(IEnumerable<int> integers, IEnumerable<double> doubles)
         {
             // TODO : Implement AreNumericListsEqual
-            return integers.SequenceEqual(doubles.Select(t => (int)t));
+            //var out1 = integers.SequenceEqual(doubles.Select(t => (int)t));
+            var out2 = doubles.SequenceEqual(integers.Select(t => (double)t));
+            return out2;
         }
 
         /// <summary>
@@ -605,8 +634,10 @@ namespace EnumerableTask
         public string GetNextVersionFromList(IEnumerable<string> versions, string currentVersion)
         {
             // TODO : Implement GetNextVersionFromList
-            var array = versions.SkipWhile(t => t != currentVersion).Skip(1).Take(1).ToArray();
-            return array.Length > 0 ? array[0] : null;
+            //var out1 = versions.SkipWhile(t => t != currentVersion).Skip(1).Take(1).ToArray();
+            var out2 = versions.SkipWhile(t => t != currentVersion).ElementAtOrDefault(1);
+            // return array.Length > 0 ? array[0] : null;
+            return out2;
         }
 
         /// <summary>
@@ -645,7 +676,9 @@ namespace EnumerableTask
         public int GetProductOfVectors(IEnumerable<int> vector1, IEnumerable<int> vector2)
         {
             // TODO : Implement GetProductOfVectors
-            return vector1.Zip(vector2, (i1, i2) => i1 * i2).Aggregate((result, t) => result + t);
+            // var out1 = vector1.Zip(vector2, (i1, i2) => i1 * i2).Aggregate((result, t) => result + t);
+            var out2 = vector1.Zip(vector2, (i1, i2) => i1 * i2).Sum();
+            return out2;
         }
 
 
